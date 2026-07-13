@@ -96,7 +96,9 @@ plane_war/
 │               │   ├── GameFrame.java    # 游戏窗口
 │               │   └── GamePanel.java    # 游戏面板
 │               ├── controller/           # 控制层
-│               │   ├── GameController.java  # 游戏控制器
+│               │   ├── GameController.java  # 游戏控制器（流程控制、状态管理）
+│               │   ├── EnemySpawner.java    # 敌人/BOSS生成、道具掉落
+│               │   ├── CombatSystem.java    # 碰撞检测、伤害结算
 │               │   ├── GameLoop.java     # 游戏循环
 │               │   ├── KeyController.java  # 键盘控制
 │               │   └── MouseController.java # 鼠标控制
@@ -105,6 +107,7 @@ plane_war/
 │                   ├── CollisionDetector.java # 碰撞检测
 │                   └── HighScoreManager.java  # 最高分管理
 ├── highscore.dat             # 最高分存档
+├── CODE_REVIEW.md            # 代码审查报告
 ├── pom.xml                   # Maven配置
 └── README.md                 # 项目说明
 ```
