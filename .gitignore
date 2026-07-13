@@ -2,3 +2,6 @@ target/
 *.dat
 .DS_Store
 *.class
+.idea/
+*.iml
+*.log

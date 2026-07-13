@@ -116,20 +116,38 @@ public class Player {
         return lives;
     }
 
-    public boolean isInvincible() {
-        if (isInvincible) {
-            if (System.currentTimeMillis() - invincibleTime > 2000) {
-                isInvincible = false;
-            }
+    /**
+     * 每帧更新，统一处理所有计时器过期逻辑。
+     */
+    public void update() {
+        long now = System.currentTimeMillis();
+
+        if (isInvincible && now - invincibleTime > 2000) {
+            isInvincible = false;
         }
+        if (bulletLevelEndTime > 0 && now > bulletLevelEndTime) {
+            bulletLevel = 1;
+            bulletLevelEndTime = 0;
+        }
+        if (fireRateEndTime > 0 && now > fireRateEndTime) {
+            fireRateMultiplier = 1.0;
+            fireRateEndTime = 0;
+        }
+        if (damageEndTime > 0 && now > damageEndTime) {
+            damageMultiplier = 1;
+            damageEndTime = 0;
+        }
+        if (speedEndTime > 0 && now > speedEndTime) {
+            speedMultiplier = 1.0;
+            speedEndTime = 0;
+        }
+    }
+
+    public boolean isInvincible() {
         return isInvincible;
     }
 
     public int getBulletLevel() {
-        if (bulletLevelEndTime > 0 && System.currentTimeMillis() > bulletLevelEndTime) {
-            bulletLevel = 1;
-            bulletLevelEndTime = 0;
-        }
         return bulletLevel;
     }
 
@@ -139,10 +157,6 @@ public class Player {
     }
 
     public double getFireRateMultiplier() {
-        if (fireRateEndTime > 0 && System.currentTimeMillis() > fireRateEndTime) {
-            fireRateMultiplier = 1.0;
-            fireRateEndTime = 0;
-        }
         return fireRateMultiplier;
     }
 
@@ -152,10 +166,6 @@ public class Player {
     }
 
     public int getDamageMultiplier() {
-        if (damageEndTime > 0 && System.currentTimeMillis() > damageEndTime) {
-            damageMultiplier = 1;
-            damageEndTime = 0;
-        }
         return damageMultiplier;
     }
 
@@ -165,10 +175,6 @@ public class Player {
     }
 
     public double getSpeedMultiplier() {
-        if (speedEndTime > 0 && System.currentTimeMillis() > speedEndTime) {
-            speedMultiplier = 1.0;
-            speedEndTime = 0;
-        }
         return speedMultiplier;
     }
 

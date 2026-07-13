@@ -6,63 +6,35 @@ import com.example.planewar.model.Player;
 import com.example.planewar.model.PowerUp;
 
 public class CollisionDetector {
+    private static boolean checkAABBCollision(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2) {
+        return x1 + w1 > x2 && x1 < x2 + w2 && y1 + h1 > y2 && y1 < y2 + h2;
+    }
+
     public static boolean checkPlayerEnemyCollision(Player player, Enemy enemy) {
-        int playerLeft = player.getX();
-        int playerRight = player.getX() + player.getWidth();
-        int playerTop = player.getY();
-        int playerBottom = player.getY() + player.getHeight();
-
-        int enemyLeft = enemy.getX();
-        int enemyRight = enemy.getX() + enemy.getWidth();
-        int enemyTop = enemy.getY();
-        int enemyBottom = enemy.getY() + enemy.getHeight();
-
-        return playerRight > enemyLeft && playerLeft < enemyRight
-                && playerBottom > enemyTop && playerTop < enemyBottom;
+        return checkAABBCollision(
+                player.getX(), player.getY(), player.getWidth(), player.getHeight(),
+                enemy.getX(), enemy.getY(), enemy.getWidth(), enemy.getHeight()
+        );
     }
 
     public static boolean checkBulletEnemyCollision(Bullet bullet, Enemy enemy) {
-        int bulletLeft = bullet.getX();
-        int bulletRight = bullet.getX() + bullet.getWidth();
-        int bulletTop = bullet.getY();
-        int bulletBottom = bullet.getY() + bullet.getHeight();
-
-        int enemyLeft = enemy.getX();
-        int enemyRight = enemy.getX() + enemy.getWidth();
-        int enemyTop = enemy.getY();
-        int enemyBottom = enemy.getY() + enemy.getHeight();
-
-        return bulletRight > enemyLeft && bulletLeft < enemyRight
-                && bulletBottom > enemyTop && bulletTop < enemyBottom;
+        return checkAABBCollision(
+                bullet.getX(), bullet.getY(), bullet.getWidth(), bullet.getHeight(),
+                enemy.getX(), enemy.getY(), enemy.getWidth(), enemy.getHeight()
+        );
     }
 
     public static boolean checkBulletPlayerCollision(Bullet bullet, Player player) {
-        int bulletLeft = bullet.getX();
-        int bulletRight = bullet.getX() + bullet.getWidth();
-        int bulletTop = bullet.getY();
-        int bulletBottom = bullet.getY() + bullet.getHeight();
-
-        int playerLeft = player.getX();
-        int playerRight = player.getX() + player.getWidth();
-        int playerTop = player.getY();
-        int playerBottom = player.getY() + player.getHeight();
-
-        return bulletRight > playerLeft && bulletLeft < playerRight
-                && bulletBottom > playerTop && bulletTop < playerBottom;
+        return checkAABBCollision(
+                bullet.getX(), bullet.getY(), bullet.getWidth(), bullet.getHeight(),
+                player.getX(), player.getY(), player.getWidth(), player.getHeight()
+        );
     }
 
     public static boolean checkPlayerPowerUpCollision(Player player, PowerUp powerUp) {
-        int playerLeft = player.getX();
-        int playerRight = player.getX() + player.getWidth();
-        int playerTop = player.getY();
-        int playerBottom = player.getY() + player.getHeight();
-
-        int powerUpLeft = powerUp.getX();
-        int powerUpRight = powerUp.getX() + powerUp.getWidth();
-        int powerUpTop = powerUp.getY();
-        int powerUpBottom = powerUp.getY() + powerUp.getHeight();
-
-        return playerRight > powerUpLeft && playerLeft < powerUpRight
-                && playerBottom > powerUpTop && playerTop < powerUpBottom;
+        return checkAABBCollision(
+                player.getX(), player.getY(), player.getWidth(), player.getHeight(),
+                powerUp.getX(), powerUp.getY(), powerUp.getWidth(), powerUp.getHeight()
+        );
     }
 }

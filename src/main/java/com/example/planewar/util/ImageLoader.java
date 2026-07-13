@@ -5,8 +5,10 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Logger;
 
 public class ImageLoader {
+    private static final Logger logger = Logger.getLogger(ImageLoader.class.getName());
     private static final String IMAGE_DIR = "image";
 
     public static Image loadImage(String filename) {
@@ -14,10 +16,15 @@ public class ImageLoader {
             File file = new File(IMAGE_DIR, filename);
             if (file.exists()) {
                 BufferedImage img = ImageIO.read(file);
+                if (img == null) {
+                    logger.warning("图片文件无法解码: " + filename);
+                }
                 return img;
+            } else {
+                logger.warning("图片文件不存在: " + filename);
             }
         } catch (IOException e) {
-            System.err.println("无法加载图片: " + filename);
+            logger.severe("加载图片失败: " + filename + ", 错误: " + e.getMessage());
         }
         return null;
     }

@@ -17,6 +17,8 @@ public class GamePanel extends JPanel {
     private GameController controller;
     private GameState gameState;
 
+    private static final LevelConfig[] LEVELS = LevelConfig.getLevels();
+
     public static final int MENU_STORY_X = 150;
     public static final int MENU_STORY_Y = 250;
     public static final int MENU_STORY_WIDTH = 150;
@@ -46,6 +48,15 @@ public class GamePanel extends JPanel {
     public static final int WIN_MENU_Y = 350;
     public static final int WIN_MENU_WIDTH = 150;
     public static final int WIN_MENU_HEIGHT = 50;
+    
+    private static final int LEVEL_BUTTON_WIDTH = 400;
+    private static final int LEVEL_BUTTON_HEIGHT = 70;
+    private static final int LEVEL_BUTTON_SPACING = 20;
+    private static final int LEVEL_BUTTON_START_Y = 150;
+    
+    private Font getFont(int style, int size) {
+        return new Font(Font.SANS_SERIF, style, size);
+    }
 
     public GamePanel() {
         setDoubleBuffered(true);
@@ -54,6 +65,107 @@ public class GamePanel extends JPanel {
     public void setController(GameController controller) {
         this.controller = controller;
         this.gameState = controller.getGameState();
+    }
+
+    public MenuAction getMenuAction(int x, int y) {
+        if (!gameState.isGameStarted()) {
+            if (gameState.getGameMode() == null) {
+                return getMainMenuAction(x, y);
+            } else {
+                return getLevelSelectAction(x, y);
+            }
+        } else if (gameState.isPaused()) {
+            return getPauseMenuAction(x, y);
+        } else if (gameState.isGameOver()) {
+            return getGameOverAction(x, y);
+        }
+        return MenuAction.NONE;
+    }
+
+    private MenuAction getMainMenuAction(int x, int y) {
+        if (isInBounds(x, y, MENU_STORY_X, MENU_STORY_Y, MENU_STORY_WIDTH, MENU_STORY_HEIGHT)) {
+            return MenuAction.STORY_MODE;
+        } else if (isInBounds(x, y, MENU_SURVIVAL_X, MENU_SURVIVAL_Y, MENU_SURVIVAL_WIDTH, MENU_SURVIVAL_HEIGHT)) {
+            return MenuAction.SURVIVAL_MODE;
+        }
+        return MenuAction.NONE;
+    }
+
+    private MenuAction getLevelSelectAction(int x, int y) {
+        LevelConfig[] levels = LevelConfig.getLevels();
+        for (int i = 0; i < levels.length; i++) {
+            int levelX = (GameFrame.WIDTH - LEVEL_BUTTON_WIDTH) / 2;
+            int levelY = LEVEL_BUTTON_START_Y + i * (LEVEL_BUTTON_HEIGHT + LEVEL_BUTTON_SPACING);
+            if (isInBounds(x, y, levelX, levelY, LEVEL_BUTTON_WIDTH, LEVEL_BUTTON_HEIGHT)) {
+                if (i + 1 == 6) {
+                    return MenuAction.SURVIVAL_MODE;
+                } else {
+                    return new MenuAction(MenuAction.Type.LEVEL_SELECT, i + 1);
+                }
+            }
+        }
+        return MenuAction.NONE;
+    }
+
+    private MenuAction getPauseMenuAction(int x, int y) {
+        if (isInBounds(x, y, PAUSE_RESUME_X, PAUSE_RESUME_Y, PAUSE_RESUME_WIDTH, PAUSE_RESUME_HEIGHT)) {
+            return MenuAction.RESUME;
+        } else if (isInBounds(x, y, PAUSE_MENU_X, PAUSE_MENU_Y, PAUSE_MENU_WIDTH, PAUSE_MENU_HEIGHT)) {
+            return MenuAction.MAIN_MENU;
+        }
+        return MenuAction.NONE;
+    }
+
+    private MenuAction getGameOverAction(int x, int y) {
+        if (isInBounds(x, y, WIN_NEXT_X, WIN_NEXT_Y, WIN_NEXT_WIDTH, WIN_NEXT_HEIGHT)) {
+            if (gameState.isWin() && gameState.getLevel() < 5) {
+                return MenuAction.NEXT_LEVEL;
+            } else if (!gameState.isWin()) {
+                return MenuAction.RETRY;
+            }
+        }
+        if (isInBounds(x, y, WIN_MENU_X, WIN_MENU_Y, WIN_MENU_WIDTH, WIN_MENU_HEIGHT)) {
+            return MenuAction.MAIN_MENU;
+        }
+        return MenuAction.NONE;
+    }
+
+    private boolean isInBounds(int x, int y, int boundX, int boundY, int width, int height) {
+        return x >= boundX && x <= boundX + width && y >= boundY && y <= boundY + height;
+    }
+
+    public static class MenuAction {
+        public enum Type {
+            NONE, STORY_MODE, SURVIVAL_MODE, RESUME, MAIN_MENU, NEXT_LEVEL, RETRY, LEVEL_SELECT
+        }
+
+        private final Type type;
+        private final int levelNumber;
+
+        public MenuAction(Type type) {
+            this(type, 0);
+        }
+
+        public MenuAction(Type type, int levelNumber) {
+            this.type = type;
+            this.levelNumber = levelNumber;
+        }
+
+        public Type getType() {
+            return type;
+        }
+
+        public int getLevelNumber() {
+            return levelNumber;
+        }
+
+        public static final MenuAction NONE = new MenuAction(Type.NONE);
+        public static final MenuAction STORY_MODE = new MenuAction(Type.STORY_MODE);
+        public static final MenuAction SURVIVAL_MODE = new MenuAction(Type.SURVIVAL_MODE);
+        public static final MenuAction RESUME = new MenuAction(Type.RESUME);
+        public static final MenuAction MAIN_MENU = new MenuAction(Type.MAIN_MENU);
+        public static final MenuAction NEXT_LEVEL = new MenuAction(Type.NEXT_LEVEL);
+        public static final MenuAction RETRY = new MenuAction(Type.RETRY);
     }
 
     @Override
@@ -106,7 +218,7 @@ public class GamePanel extends JPanel {
         g2d.fillRect(0, 0, getWidth(), getHeight());
 
         g2d.setColor(new Color(0, 200, 255));
-        g2d.setFont(new Font("Microsoft YaHei", Font.BOLD, 56));
+        g2d.setFont(getFont(Font.BOLD, 56));
         FontMetrics fm = g2d.getFontMetrics();
         String title = "飞机大战";
         int titleX = (getWidth() - fm.stringWidth(title)) / 2;
@@ -114,7 +226,7 @@ public class GamePanel extends JPanel {
         g2d.drawString(title, titleX, titleY);
 
         g2d.setColor(Color.WHITE);
-        g2d.setFont(new Font("Microsoft YaHei", Font.PLAIN, 18));
+        g2d.setFont(getFont(Font.PLAIN, 18));
         String subtitle = "PLANE WAR";
         int subX = (getWidth() - g2d.getFontMetrics().stringWidth(subtitle)) / 2;
         g2d.drawString(subtitle, subX, 190);
@@ -127,7 +239,7 @@ public class GamePanel extends JPanel {
         g2d.fillRoundRect(MENU_STORY_X, MENU_STORY_Y, MENU_STORY_WIDTH, MENU_STORY_HEIGHT, 15, 15);
         
         g2d.setColor(Color.WHITE);
-        g2d.setFont(new Font("Microsoft YaHei", Font.BOLD, 24));
+        g2d.setFont(getFont(Font.BOLD, 24));
         fm = g2d.getFontMetrics();
         String storyText = "闯关模式";
         int storyTextX = MENU_STORY_X + (MENU_STORY_WIDTH - fm.stringWidth(storyText)) / 2;
@@ -148,13 +260,13 @@ public class GamePanel extends JPanel {
         g2d.drawString(survivalText, survivalTextX, survivalTextY);
 
         g2d.setColor(Color.WHITE);
-        g2d.setFont(new Font("Microsoft YaHei", Font.PLAIN, 14));
+        g2d.setFont(getFont(Font.PLAIN, 14));
         String hint = "点击按钮选择模式";
         int hintX = (getWidth() - g2d.getFontMetrics().stringWidth(hint)) / 2;
         g2d.drawString(hint, hintX, 330);
 
         if (gameState.getHighScore() > 0) {
-            g2d.setFont(new Font("Microsoft YaHei", Font.PLAIN, 16));
+            g2d.setFont(getFont(Font.PLAIN, 16));
             String highScore = "最高分: " + gameState.getHighScore();
             int hsX = (getWidth() - g2d.getFontMetrics().stringWidth(highScore)) / 2;
             g2d.drawString(highScore, hsX, 400);
@@ -166,7 +278,7 @@ public class GamePanel extends JPanel {
         g2d.fillRect(0, 0, getWidth(), getHeight());
 
         g2d.setColor(new Color(0, 200, 255));
-        g2d.setFont(new Font("Microsoft YaHei", Font.BOLD, 36));
+        g2d.setFont(getFont(Font.BOLD, 36));
         FontMetrics fm = g2d.getFontMetrics();
         String title = "选择关卡";
         int titleX = (getWidth() - fm.stringWidth(title)) / 2;
@@ -191,21 +303,21 @@ public class GamePanel extends JPanel {
             g2d.fillRoundRect(x, y, levelWidth, levelHeight, 15, 15);
 
             g2d.setColor(new Color(0, 200, 255));
-            g2d.setFont(new Font("Microsoft YaHei", Font.BOLD, 24));
+            g2d.setFont(getFont(Font.BOLD, 24));
             String levelNum = "第 " + level.getLevelNumber() + " 关";
             g2d.drawString(levelNum, x + 20, y + 30);
 
             g2d.setColor(Color.WHITE);
-            g2d.setFont(new Font("Microsoft YaHei", Font.BOLD, 18));
+            g2d.setFont(getFont(Font.BOLD, 18));
             g2d.drawString(level.getName(), x + 20, y + 55);
 
             g2d.setColor(new Color(150, 150, 200));
-            g2d.setFont(new Font("Microsoft YaHei", Font.PLAIN, 14));
+            g2d.setFont(getFont(Font.PLAIN, 14));
             g2d.drawString(level.getDescription(), x + 200, y + 45);
         }
 
         g2d.setColor(Color.WHITE);
-        g2d.setFont(new Font("Microsoft YaHei", Font.PLAIN, 14));
+        g2d.setFont(getFont(Font.PLAIN, 14));
         String backHint = "按 ESC 返回主菜单";
         int backX = (getWidth() - g2d.getFontMetrics().stringWidth(backHint)) / 2;
         g2d.drawString(backHint, backX, 600);
@@ -219,10 +331,10 @@ public class GamePanel extends JPanel {
         
         if (isWin) {
             g2d.setColor(new Color(0, 200, 100));
-            g2d.setFont(new Font("Microsoft YaHei", Font.BOLD, 48));
+            g2d.setFont(getFont(Font.BOLD, 48));
         } else {
             g2d.setColor(new Color(255, 50, 50));
-            g2d.setFont(new Font("Microsoft YaHei", Font.BOLD, 48));
+            g2d.setFont(getFont(Font.BOLD, 48));
         }
         
         FontMetrics fm = g2d.getFontMetrics();
@@ -231,7 +343,7 @@ public class GamePanel extends JPanel {
         g2d.drawString(title, titleX, 200);
 
         g2d.setColor(Color.WHITE);
-        g2d.setFont(new Font("Microsoft YaHei", Font.PLAIN, 24));
+        g2d.setFont(getFont(Font.PLAIN, 24));
         fm = g2d.getFontMetrics();
         
         String score = "得分: " + gameState.getScore();
@@ -246,7 +358,7 @@ public class GamePanel extends JPanel {
         int hsX = (getWidth() - fm.stringWidth(highScore)) / 2;
         g2d.drawString(highScore, hsX, 340);
 
-        g2d.setFont(new Font("Microsoft YaHei", Font.BOLD, 22));
+        g2d.setFont(getFont(Font.BOLD, 22));
 
         if (isWin && gameState.getLevel() < 5) {
             GradientPaint gradient1 = new GradientPaint(
@@ -308,7 +420,7 @@ public class GamePanel extends JPanel {
         g2d.fillRect(0, 0, getWidth(), getHeight());
 
         g2d.setColor(Color.WHITE);
-        g2d.setFont(new Font("Microsoft YaHei", Font.BOLD, 36));
+        g2d.setFont(getFont(Font.BOLD, 36));
         FontMetrics fm = g2d.getFontMetrics();
         String paused = "暂停";
         int pausedX = (getWidth() - fm.stringWidth(paused)) / 2;
@@ -322,7 +434,7 @@ public class GamePanel extends JPanel {
         g2d.fillRoundRect(PAUSE_RESUME_X, PAUSE_RESUME_Y, PAUSE_RESUME_WIDTH, PAUSE_RESUME_HEIGHT, 15, 15);
         
         g2d.setColor(Color.WHITE);
-        g2d.setFont(new Font("Microsoft YaHei", Font.BOLD, 22));
+        g2d.setFont(getFont(Font.BOLD, 22));
         fm = g2d.getFontMetrics();
         String resumeText = "继续游戏";
         int resumeTextX = PAUSE_RESUME_X + (PAUSE_RESUME_WIDTH - fm.stringWidth(resumeText)) / 2;
@@ -422,7 +534,7 @@ public class GamePanel extends JPanel {
                 g2d.fillRect(powerUp.getX(), powerUp.getY(), powerUp.getWidth(), powerUp.getHeight());
                 
                 g2d.setColor(Color.WHITE);
-                g2d.setFont(new Font("Microsoft YaHei", Font.BOLD, 12));
+                g2d.setFont(getFont(Font.BOLD, 12));
                 FontMetrics fm = g2d.getFontMetrics();
                 String name = powerUp.getType().getName();
                 int nameX = powerUp.getX() + (powerUp.getWidth() - fm.stringWidth(name)) / 2;
@@ -437,18 +549,23 @@ public class GamePanel extends JPanel {
         g2d.fillRect(0, 0, getWidth(), 50);
 
         g2d.setColor(Color.WHITE);
-        g2d.setFont(new Font("Microsoft YaHei", Font.PLAIN, 16));
+        g2d.setFont(getFont(Font.PLAIN, 16));
 
         String score = "得分: " + gameState.getScore();
         g2d.drawString(score, 15, 25);
 
         String level = "关卡 " + gameState.getLevel();
+        if (gameState.getGameMode() == GameMode.SURVIVAL) {
+            level = "无限模式 — 第 " + gameState.getBossWave() + " 波";
+        }
         int levelX = getWidth() / 2 - g2d.getFontMetrics().stringWidth(level) / 2;
         g2d.drawString(level, levelX, 25);
 
-        LevelConfig currentLevel = LevelConfig.getLevels()[Math.min(gameState.getLevel() - 1, 4)];
+        LevelConfig currentLevel = LEVELS[Math.min(gameState.getLevel() - 1, LEVELS.length - 1)];
         String condition = "";
-        if (currentLevel.getWinCondition() == LevelConfig.WinCondition.SCORE) {
+        if (gameState.getGameMode() == GameMode.SURVIVAL) {
+            condition = "最高分: " + Math.max(gameState.getScore(), gameState.getHighScore());
+        } else if (currentLevel.getWinCondition() == LevelConfig.WinCondition.SCORE) {
             condition = "目标: " + currentLevel.getTargetScore() + "分";
         } else if (currentLevel.getWinCondition() == LevelConfig.WinCondition.KILL_COUNT) {
             condition = "击杀: " + gameState.getEnemiesKilled() + "/" + currentLevel.getTargetKillCount();
@@ -457,8 +574,11 @@ public class GamePanel extends JPanel {
         }
         g2d.drawString(condition, 15, 45);
 
+        Player player = gameState.getPlayer();
+        if (player == null) return;
+
         Image hpImg = controller.getHpImage();
-        for (int i = 0; i < gameState.getPlayer().getLives(); i++) {
+        for (int i = 0; i < player.getLives(); i++) {
             if (hpImg != null) {
                 g2d.drawImage(hpImg, getWidth() - 35 - i * 30, 15, 25, 20, null);
             } else {
@@ -466,9 +586,5 @@ public class GamePanel extends JPanel {
                 g2d.fillRect(getWidth() - 35 - i * 30, 15, 25, 20);
             }
         }
-    }
-
-    public void repaintGame() {
-        repaint();
     }
 }

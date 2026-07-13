@@ -6,7 +6,6 @@ import java.util.List;
 public class GameState {
     private int score;
     private int highScore;
-    private int lives;
     private boolean isPaused;
     private boolean isGameOver;
     private boolean isGameStarted;
@@ -14,6 +13,7 @@ public class GameState {
     private int level;
     private int enemiesKilled;
     private int enemiesPerLevel;
+    private int bossWave;
     private GameMode gameMode;
 
     private List<Enemy> enemies;
@@ -24,13 +24,13 @@ public class GameState {
     public GameState() {
         this.score = 0;
         this.highScore = 0;
-        this.lives = 3;
         this.isPaused = false;
         this.isGameOver = false;
         this.isGameStarted = false;
         this.level = 1;
         this.enemiesKilled = 0;
         this.enemiesPerLevel = 10;
+        this.bossWave = 1;
         this.gameMode = null;
         
         this.enemies = new ArrayList<>();
@@ -40,13 +40,13 @@ public class GameState {
 
     public void reset(GameMode mode) {
         this.score = 0;
-        this.lives = 3;
         this.isPaused = false;
         this.isGameOver = false;
         this.isGameStarted = true;
         this.isWin = false;
         this.level = 1;
         this.enemiesKilled = 0;
+        this.bossWave = 1;
         this.gameMode = mode;
         this.enemies.clear();
         this.bullets.clear();
@@ -100,10 +100,6 @@ public class GameState {
         this.highScore = highScore;
     }
 
-    public void setLives(int lives) {
-        this.lives = lives;
-    }
-
     public void setPaused(boolean paused) {
         isPaused = paused;
     }
@@ -144,10 +140,6 @@ public class GameState {
         return highScore;
     }
 
-    public int getLives() {
-        return lives;
-    }
-
     public boolean isPaused() {
         return isPaused;
     }
@@ -170,6 +162,18 @@ public class GameState {
 
     public int getEnemiesPerLevel() {
         return enemiesPerLevel;
+    }
+
+    public int getBossWave() {
+        return bossWave;
+    }
+
+    public void setBossWave(int bossWave) {
+        this.bossWave = bossWave;
+    }
+
+    public void incrementBossWave() {
+        this.bossWave++;
     }
 
     public GameMode getGameMode() {

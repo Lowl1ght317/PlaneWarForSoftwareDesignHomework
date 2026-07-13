@@ -156,6 +156,46 @@ java -jar target/plane_war-1.0.0.jar
 
 ## 版本历史
 
+- v1.2.3: 架构重构与职责分离
+  - **架构拆分**: 将 GameController(713行)拆分为三个职责单一的类：
+    - `EnemySpawner` — 敌人/BOSS生成、道具掉落、敌机射击
+    - `CombatSystem` — 碰撞检测、伤害结算、道具效果
+    - `GameController` — 流程控制、玩家输入、状态管理
+  - **视图逻辑内聚**: 按钮点击检测逻辑从 GameController 移入 GamePanel，消除坐标重复定义
+  - **MenuAction类**: 创建统一的菜单操作封装类，替代硬编码的坐标判断
+  - **代码简化**: GameController 精简至约 360 行，可读性和可维护性大幅提升
+
+- v1.2.2: 代码质量与异常处理优化
+  - **常量提取**: 将普通敌机子弹偏移量(3)提取为 ENEMY_BULLET_OFFSET_X 常量
+  - **空指针保护**: GameController.update() 添加 player 空指针检查，防止状态切换时崩溃
+  - **代码重构**: CollisionDetector 提取通用 checkAABBCollision() 方法，消除 4 个重复检测逻辑
+  - **日志改进**: ImageLoader 和 HighScoreManager 使用 java.util.logging 替代 System.err，增加详细日志
+  - **异常处理**: ImageLoader 添加文件不存在和图片解码失败的单独处理
+
+- v1.2.1: 代码健壮性与设计修正
+  - **BUG修复**: BOSS移动从真实时间改为游戏时间（暂停后不再瞬移）
+  - **BUG修复**: drawHUD添加player空指针保护，避免状态切换时崩溃
+  - **设计修正**: Level 4/5关卡击杀BOSS直接触发通关（替代纯分数判定）
+  - **代码质量**: Player计时器过期逻辑从getter提取到update()方法（消除getter副作用）
+  - **代码清理**: 删除GameState.lives死代码、PowerUpType.Color未使用字段
+  - **封装改进**: Enemy.setDestroyed()改为destroy()方法，防止外部绕过血量系统
+  - **性能优化**: LevelConfig数组缓存为static final，避免每帧分配新对象
+  - **UI改进**: 生存模式HUD显示当前波次和最高分，替代误导的关卡5目标
+  - **可维护性**: BOSS子弹偏移量、BOSS刷新击杀阈值等提取为命名常量
+
+- v1.2: 代码质量与架构优化
+  - **BUG修复**: 修复无限模式BOSS波次计数无效问题（bossWave改为GameState成员变量）
+  - **线程安全**: GameLoop running标志添加volatile关键字
+  - **动态难度**: 生存模式实现动态难度（刷怪间隔、敌人数量、类型比例随波次递增）
+  - **代码重构**: 合并spawnBoss/spawnSurvivalBoss为单一方法
+  - **常量提取**: 子弹偏移量、BOSS移动参数、生存模式参数等魔法数字提取为命名常量
+  - **性能优化**: GameLoop使用可变睡眠时间；暂停时线程挂起降低CPU消耗
+  - **资源优化**: Random实例改为静态final单例，避免每帧创建
+  - **跨平台兼容**: 字体从Microsoft YaHei改为Font.SANS_SERIF
+  - **构建优化**: 更新maven-compiler-plugin(3.8.1→3.11.0)和maven-jar-plugin(3.2.0→3.3.0)
+  - **测试支持**: 添加JUnit 4依赖
+  - **gitignore完善**: 添加.idea/、*.iml、*.log等忽略规则
+
 - v1.1: 游戏平衡性调整
   - 玩家基础速度从8降低到6，加速道具倍率从2倍调整为1.5倍
   - 敌人射击间隔上调：快速2s→3s、精英1s→1.5s、BOSS 0.8s→1.2s、最终BOSS 0.5s→0.8s

@@ -4,6 +4,8 @@ import java.awt.Image;
 import java.util.Random;
 
 public class Enemy {
+    private static final Random RANDOM = new Random();
+    
     private int x;
     private int y;
     private int width;
@@ -75,8 +77,7 @@ public class Enemy {
     }
 
     public static Enemy createRandomEnemy(int screenWidth) {
-        Random random = new Random();
-        int rand = random.nextInt(100);
+        int rand = RANDOM.nextInt(100);
         EnemyType type;
         
         if (rand < 70) {
@@ -87,7 +88,7 @@ public class Enemy {
             type = EnemyType.ELITE;
         }
         
-        int x = random.nextInt(screenWidth - type.getWidth());
+        int x = RANDOM.nextInt(screenWidth - type.getWidth());
         return new Enemy(x, -type.getHeight(), type);
     }
 
@@ -100,6 +101,10 @@ public class Enemy {
         if (health <= 0) {
             isDestroyed = true;
         }
+    }
+
+    public void destroy() {
+        isDestroyed = true;
     }
 
     public void setX(int x) {
@@ -132,10 +137,6 @@ public class Enemy {
 
     public void setImage(Image image) {
         this.image = image;
-    }
-
-    public void setDestroyed(boolean destroyed) {
-        isDestroyed = destroyed;
     }
 
     public int getX() {
