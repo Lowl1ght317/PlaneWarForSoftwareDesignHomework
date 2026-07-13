@@ -107,7 +107,6 @@ plane_war/
 │                   ├── CollisionDetector.java # 碰撞检测
 │                   └── HighScoreManager.java  # 最高分管理
 ├── highscore.dat             # 最高分存档
-├── CODE_REVIEW.md            # 代码审查报告
 ├── pom.xml                   # Maven配置
 └── README.md                 # 项目说明
 ```
